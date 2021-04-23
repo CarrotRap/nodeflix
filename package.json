@@ -1,0 +1,43 @@
+{
+  "name": "nodeflix",
+  "productName": "NodeFlix",
+  "version": "1.0.0",
+  "description": "Netflixs",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "nodemon": "nodemon -e js,html,css --exec 'yarn start'"
+  },
+  "repository": "https://github.com/Kairrot/nodeflix",
+  "keywords": [
+    "Electron",
+    "quick",
+    "start",
+    "tutorial",
+    "demo"
+  ],
+  "author": "GitHub",
+  "devDependencies": {
+    "electron": "^12.0.4",
+    "electron-builder": "^22.10.5"
+  },
+  "dependencies": {
+    "downloads-folder": "^3.0.1",
+    "electron-store": "^8.0.0",
+    "electron-updater": "^4.3.8",
+    "locate-chrome": "^0.1.1",
+    "nodejs-file-downloader": "^4.4.2",
+    "puppeteer": "^8.0.0",
+    "puppeteer-extra": "^3.1.18",
+    "puppeteer-extra-plugin-adblocker": "^2.11.11",
+    "puppeteer-extra-plugin-stealth": "^2.7.6",
+    "request": "^2.88.2"
+  },
+  "build": {
+    "publish": [{
+      "provider": "github",
+      "owner": "Kairrot",
+      "repo": "nodeflix"
+    }]
+  }
+}

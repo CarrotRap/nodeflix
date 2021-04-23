@@ -1,0 +1,142 @@
+body {
+    padding: 0;
+    margin: 0;
+    color: white;
+    font-family: 'Noto Sans', sans-serif;
+    height: 100vh;
+    overflow-y: hidden;
+}
+
+.frame {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 40px;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
+}
+
+.frame h3 {
+    margin-left: 10px;
+    font-weight: 800;
+}
+
+.frame .content {
+    -webkit-app-region: no-drag;
+}
+
+.frame .content button {
+    margin-right: 10px !important;
+    background: transparent;
+    border: 0;
+    padding: 5px;
+}
+
+.frame .content button:hover {
+    background: rgba(189, 189, 189, 0.43);
+}
+.frame .content button:focus {
+    outline: 0px;
+}
+
+.content .load {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 80px);
+    text-align: center;
+}
+
+.content .ready {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: calc(100vh - 80px);
+    text-align: center;
+}
+
+.content .ready .searched .valid_search {
+    width: 100%;
+    background-color: transparent;
+    padding: 8px;
+    position: relative;
+    border: solid 1px white;
+    color: white;
+}
+
+.content .ready .searched .valid_search::before {
+    position: absolute;
+    content: "";
+    background-color: coral;
+    width: 0%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: -10;
+    transition: all .4s;
+}
+
+.content .ready .searched .valid_search:hover::before {
+    width: 100%;
+}
+
+.content .ready .resultSearch {
+    font-family: 'Noto Sans', sans-serif;
+}
+
+tbody {
+    display: block;
+    height: 60vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    width: 100%;
+}
+
+.content .ready .resultSearch tbody tr:hover {
+    background-color: #810000;
+    transition: .2s;
+}
+
+.content .ready .resultSearch td {
+    padding: 5px;
+}
+
+.content .ready .video td {
+    border: 1px solid white;
+    padding: 5px;
+}
+
+.settings {
+    margin: 25px;
+    margin-top: 10px;
+}
+
+.settings div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.settings a {
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.settings .chrome a,
+.settings .headless .enabled,
+.settings .downloadPath a {
+    background: #29bb89;
+}
+
+.settings .headless .disabled { background-color: #d44000 ;}
+
+.download {
+    position: absolute;
+    background: #ffc93c;
+    top: 40px;
+    right: 10px;
+    padding: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    border-radius: 10px;
+}
