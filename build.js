@@ -1,12 +1,26 @@
 const builder = require('electron-builder');
 const Platform = builder.Platform;
 
+function getPlatform(){
+    switch(process.argv[2]){
+        case 'win':
+            return Platform.WINDOWS
+        case 'darwin':
+            return Platform.MAC
+        case 'linux':
+            return Platform.LINUX
+        default:
+            console.error('Cannot resolve current platform!')
+            return undefined
+    }
+}
+
 builder.build({
-    targets: Platform.LINUX.createTarget(),
+    targets: getPlatform().createTarget(),
     config: {
         appId: 'nodeflix',
         productName: 'NodeFlix',
-        artifactName: '${productName}.${ext}',
+        artifactName: '${productName}-${version}.${ext}',
         directories: {
             buildResources: 'build',
             output: 'dist'
@@ -35,6 +49,11 @@ builder.build({
             description: 'NodeFlix',
             category: 'Game'
         },
+        publish: [{
+            provider: 'github',
+            owner: 'Kairrot',
+            repo: 'nodeflix'
+        }]
     }
 }).then(() => {
     console.log('Build complete')

@@ -1,6 +1,5 @@
 // Modules to control application life and create native browser window
-const {app, BrowserWindow, screen} = require('electron')
-const { autoUpdater } = require('electron-updater');
+const {app, BrowserWindow, screen, ipcMain, autoUpdater} = require('electron')
 const path = require('path')
 global.store = new (require('electron-store'))()
 
@@ -24,32 +23,12 @@ function createWindow () {
   mainWindow.loadFile('app/app.html')
 }
 
-autoUpdater.on('checking-for-update', () => {
-  console.log('Checking for update...');
-})
-autoUpdater.on('update-available', (info) => {
-  console.log('Update available.');
-})
-autoUpdater.on('update-not-available', (info) => {
-  console.log('Update not available.');
-})
-autoUpdater.on('error', (err) => {
-  console.log('Error in auto-updater. ' + err);
-})
-autoUpdater.on('download-progress', (progressObj) => {
-  let log_message = "Download speed: " + progressObj.bytesPerSecond;
-  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%';
-  log_message = log_message + ' (' + progressObj.transferred + "/" + progressObj.total + ')';
-  console.log(log_message);
-})
-autoUpdater.on('update-downloaded', (info) => {
-  console.log('Update downloaded');
-});
-
 app.whenReady().then(() => {
-  autoUpdater.checkForUpdatesAndNotify();
-
   createWindow()
+
+  mainWindow.webContents.on('did-finish-load', function () {
+      require('./app/assets/js/updater')(mainWindow)
+  });
   
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
@@ -58,4 +37,8 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit()
+})
+
+ipcMain.on('update', (event) => {
+  autoUpdater.quitAndInstall()
 })

@@ -27,7 +27,7 @@
     font-size: 12px;
 }
 
-button {border: 0;}
+button {border: 0; font-family: 'Noto Sans', sans-serif;}
 button:focus {outline: 0;}
 
 .checkbox {

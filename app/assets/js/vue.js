@@ -1,10 +1,10 @@
-const { remote } = require('electron');
+const { remote, ipcRenderer, app } = require('electron');
 const dialog = remote.dialog;
 const locateChrome = require('locate-chrome');
 const downloadsFolder = require('downloads-folder');
 const store = remote.getGlobal('store');
 
-var page,browser;
+var page, browser;
 
 const vue = Vue.createApp({
     data() {
@@ -30,18 +30,19 @@ const vue = Vue.createApp({
             settings: {
                 chromePath: null,
                 headless: null,
-                downloadPath: null,
-            }
+                downloadPath: null
+            },
+            update: null,
         }
     },
     methods: {
         frame(type) {
-            switch(type) {
+            switch (type) {
                 case 'minimize':
                     remote.BrowserWindow.getFocusedWindow().minimize()
                     break;
-                case 'maximize': 
-                    if(remote.BrowserWindow.getFocusedWindow().isMaximized()) {
+                case 'maximize':
+                    if (remote.BrowserWindow.getFocusedWindow().isMaximized()) {
                         remote.BrowserWindow.getFocusedWindow().unmaximize()
                     } else remote.BrowserWindow.getFocusedWindow().maximize()
                     break;
@@ -49,30 +50,30 @@ const vue = Vue.createApp({
                     remote.getCurrentWindow().close()
                     break;
                 case 'settings':
-                    if(this.stats.isSettings) this.stats.isSettings = false;
+                    if (this.stats.isSettings) this.stats.isSettings = false;
                     else this.stats.isSettings = true;
                     break;
                 case 'download':
-                    if(this.stats.showDownload) this.stats.showDownload = false;
+                    if (this.stats.showDownload) this.stats.showDownload = false;
                     else this.stats.showDownload = true;
                     break;
             }
         },
         search() {
-            (async() => {
+            (async () => {
                 await page.type('#searchinputfull', this.input.searched)
                 await page.click('#SearchOK')
-            
+
                 await page.waitForSelector('.cover_global')
                 const list = await page.$$('.cover_global')
-            
+
                 var resultSearched = [];
-                for(var el of list) {
+                for (var el of list) {
                     const title = await el.$eval('.cover_infos_title', e => e.querySelector('a').innerText);
                     const quality = await el.$eval('.cover_infos_title', e => e.querySelector('b').innerText);
                     const language = await el.$eval('.cover_infos_title', e => e.querySelector('.detail_release b span').innerText);
                     const link = await el.$eval('.cover_infos_title', e => e.querySelector('a').getAttribute('href'));
-                    resultSearched.push({title, quality, language, link})
+                    resultSearched.push({ title, quality, language, link })
                 }
 
                 this.resultSearch = resultSearched;
@@ -82,31 +83,31 @@ const vue = Vue.createApp({
         },
         getVideo(link, title) {
             (async () => {
-                await page.goto(link, {waitUntil: 'networkidle2'})
+                await page.goto(link, { waitUntil: 'networkidle2' })
                 await page.click('.btn-primary')
                 await page.waitForSelector('.postinfo')
 
-                const videos = document.createElement('div'); 
-                videos.innerHTML =  await page.$eval('.postinfo', e => e.innerHTML)
+                const videos = document.createElement('div');
+                videos.innerHTML = await page.$eval('.postinfo', e => e.innerHTML)
 
                 const all = []
                 var onefile = false;
                 var count = 0;
-                for(var el of videos.childNodes) {
-                    if(!onefile) {
-                        if(el.childNodes.length != 0) {
-                            if(el.childNodes[0].tagName == 'DIV') {
-                                if(el.childNodes[0].innerText == '1fichier') onefile = true
+                for (var el of videos.childNodes) {
+                    if (!onefile) {
+                        if (el.childNodes.length != 0) {
+                            if (el.childNodes[0].tagName == 'DIV') {
+                                if (el.childNodes[0].innerText == '1fichier') onefile = true
                             }
                         }
                     } else {
-                        if(el.tagName == 'BR') {
-                            if(count == 2) {
+                        if (el.tagName == 'BR') {
+                            if (count == 2) {
                                 break;
                             } else count += 1;
                         } else {
                             count = 0;
-                            all.push({title, name: el.childNodes[0].innerText, link: el.childNodes[0].getAttribute('href')})
+                            all.push({ title, name: el.childNodes[0].innerText, link: el.childNodes[0].getAttribute('href') })
                         }
                     }
 
@@ -121,7 +122,7 @@ const vue = Vue.createApp({
         getLink(link, title, name) {
             (async () => {
                 const pageLink = await browser.newPage();
-                await pageLink.goto(link, {waitUntil: 'networkidle2'})
+                await pageLink.goto(link, { waitUntil: 'networkidle2' })
                 await pageLink.waitForSelector('.btn-primary')
                 await pageLink.click('.btn-primary');
                 await pageLink.waitForSelector('.showURL');
@@ -133,7 +134,7 @@ const vue = Vue.createApp({
             })()
         },
         setChromePath() {
-            this.settings.chromePath = dialog.showOpenDialogSync({properties: ['openFile'], title: 'Emplacement de chrome'})[0]
+            this.settings.chromePath = dialog.showOpenDialogSync({ properties: ['openFile'], title: 'Emplacement de chrome' })[0]
             store.set('chromePath', this.settings.chromePath)
         },
         headless(less) {
@@ -141,8 +142,21 @@ const vue = Vue.createApp({
             store.set('headless', less);
         },
         changeDownloadPath() {
-            this.settings.downloadPath = dialog.showOpenDialogSync({properties: ['openDirectory'], title: 'Emplacement du téléchargement des fichiers'})[0]
+            this.settings.downloadPath = dialog.showOpenDialogSync({ properties: ['openDirectory'], title: 'Emplacement du téléchargement des fichiers' })[0]
             store.set('downloadPath', this.settings.downloadPath)
+        },
+        updateApp() {
+            ipcRenderer.send('update')
+        },
+        reload() {
+            this.stats = {
+                ready: true,
+                searched: false,
+                resultSearched: false,
+                video: false,
+                isSettings: false,
+                showDownload: false,
+            }
         }
     },
     async mounted() {
@@ -161,8 +175,8 @@ const vue = Vue.createApp({
             executablePath: this.settings.chromePath
         })
         page = await browser.newPage();
-    
-        if(store.has('cookies')) {
+
+        if (store.has('cookies')) {
             await page.setCookie(...store.get('cookies'))
         }
 
@@ -176,3 +190,17 @@ const vue = Vue.createApp({
         this.stats.searched = true;
     }
 }).mount('#app');
+
+ipcRenderer.on('update-available', (event, info) => {
+    vue.update = {
+        version: info.version
+    }
+})
+
+ipcRenderer.on('download-progress', (event, info) => {
+    vue.update.percentage = info.percent;
+})
+
+ipcRenderer.on('update-downloaded', (event, info) => {
+    vue.update.ready = true;
+})

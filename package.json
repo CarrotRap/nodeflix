@@ -2,7 +2,7 @@
   "name": "nodeflix",
   "productName": "NodeFlix",
   "version": "1.0.0",
-  "description": "Netflixs",
+  "description": "Netflix du bled",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
@@ -32,12 +32,5 @@
     "puppeteer-extra-plugin-adblocker": "^2.11.11",
     "puppeteer-extra-plugin-stealth": "^2.7.6",
     "request": "^2.88.2"
-  },
-  "build": {
-    "publish": [{
-      "provider": "github",
-      "owner": "Kairrot",
-      "repo": "nodeflix"
-    }]
   }
 }
